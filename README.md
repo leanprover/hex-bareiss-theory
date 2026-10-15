@@ -1,10 +1,10 @@
-# hex-bareiss-mathlib
+# hex-bareiss-theory
 
 Part of [`hex`](https://github.com/kim-em/hex-dev), a computer algebra
 library for Lean 4. The aim is fast executable code, fully verified, built
 with spec-driven development.
 
-`hex-bareiss-mathlib` is the Mathlib bridge for
+`hex-bareiss-theory` is the theory companion of
 [`hex-bareiss`](https://github.com/leanprover/hex-bareiss). It proves the
 row-pivoted Bareiss determinant correct, both against Mathlib's `Matrix.det`
 and against the executable Leibniz determinant from
@@ -12,7 +12,7 @@ and against the executable Leibniz determinant from
 ships the `det` tactic, which closes determinant equations on closed integer
 and rational matrix literals with a kernel-checked certificate. It depends on
 [`hex-bareiss`](https://github.com/leanprover/hex-bareiss),
-[`hex-determinant-mathlib`](https://github.com/leanprover/hex-determinant-mathlib),
+[`hex-determinant-theory`](https://github.com/leanprover/hex-determinant-theory),
 and Mathlib.
 
 # Quickstart
@@ -21,15 +21,15 @@ Add to your `lakefile.toml`:
 
 ```toml
 [[require]]
-name = "hex-bareiss-mathlib"
-git = "https://github.com/leanprover/hex-bareiss-mathlib.git"
+name = "hex-bareiss-theory"
+git = "https://github.com/leanprover/hex-bareiss-theory.git"
 rev = "main"
 ```
 
 ```lean
-import HexBareissMathlib
+import HexBareissTheory
 
-open HexMatrixMathlib
+open HexMatrixTheory
 
 -- The executable Bareiss determinant equals the Leibniz determinant.
 #check @bareiss_eq_det
@@ -87,7 +87,7 @@ example : Matrix.det (R := ℤ) !![1, 2; 3, 4] = -2 := by
   leaves them unchanged.
 
 `Rat` can use the generic correspondence directly. Multivariate polynomials
-also have Mathlib ring structures, supplied separately by `HexMvPolyMathlib`.
+also have Mathlib ring structures, supplied separately by `HexMvPolyTheory`.
 The executable `ZMod64` and dense-polynomial carriers currently have no global
 Mathlib `CommRing` instances: their computational conformance is checked by
 value guards and external oracles. Using the generic correspondence at those

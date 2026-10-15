@@ -3,7 +3,7 @@ Copyright (c) 2026 Lean FRO, LLC. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Kim Morrison
 -/
-import HexBareissMathlib
+import HexBareissTheory
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.NormDet
 import Mathlib.Tactic.Ring
@@ -15,7 +15,7 @@ dimensions with pivot swaps, on singular inputs, on a false target, on
 explicit rejection of unsupported symbolic entries, with `det` and `det%` leaving the
 ordinary `det` identifiers untouched, and the axiom audit. -/
 
-open Hex Hex.Matrix HexMatrixMathlib
+open Hex Hex.Matrix HexMatrixTheory
 open scoped Hex
 
 /-! # The kernel certificate -/
@@ -190,9 +190,9 @@ open Lean Elab Tactic
 -- Check the shipped order before adding any test handlers.
 run_cmd do
   let handlers := (tacticElabAttribute.getEntries (← getEnv)
-    ``HexMatrixMathlib.Det.detTac).map (·.declName)
+    ``HexMatrixTheory.Det.detTac).map (·.declName)
   unless handlers ==
-      [``HexMatrixMathlib.Det.evalDetTac, ``HexMatrixMathlib.Det.detDiagnostic] do
+      [``HexMatrixTheory.Det.evalDetTac, ``HexMatrixTheory.Det.detDiagnostic] do
     throwError "unexpected shipped det handler order: {handlers}"
 
 /-! Numeric delegation must be tested with the numeric handler first. A stub
@@ -204,15 +204,15 @@ private meta def detStub : Tactic := fun _ => do
   logInfo "det stub"
   evalTactic (← `(tactic| assumption))
 
-attribute [local tactic HexMatrixMathlib.Det.detTac] detStub
-attribute [local tactic HexMatrixMathlib.Det.detTac] HexMatrixMathlib.Det.evalDetTac
+attribute [local tactic HexMatrixTheory.Det.detTac] detStub
+attribute [local tactic HexMatrixTheory.Det.detTac] HexMatrixTheory.Det.evalDetTac
 
 run_cmd do
   let handlers := (tacticElabAttribute.getEntries (← getEnv)
-    ``HexMatrixMathlib.Det.detTac).map (·.declName)
+    ``HexMatrixTheory.Det.detTac).map (·.declName)
   unless handlers ==
-      [``HexMatrixMathlib.Det.evalDetTac, ``detStub,
-        ``HexMatrixMathlib.Det.evalDetTac, ``HexMatrixMathlib.Det.detDiagnostic] do
+      [``HexMatrixTheory.Det.evalDetTac, ``detStub,
+        ``HexMatrixTheory.Det.evalDetTac, ``HexMatrixTheory.Det.detDiagnostic] do
     throwError "unexpected det handler order: {handlers}"
 
 /-- info: det stub -/
@@ -314,7 +314,7 @@ section ExtensionErrors
 private meta def detDecline : Tactic := fun _ =>
   throwError "det: test capability decline"
 
-attribute [local tactic HexMatrixMathlib.Det.detTac] detDecline
+attribute [local tactic HexMatrixTheory.Det.detTac] detDecline
 
 /-- error: det: test capability decline -/
 #guard_msgs in

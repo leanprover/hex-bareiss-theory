@@ -1,9 +1,9 @@
-# hex-bareiss-mathlib (depends on hex-bareiss + hex-determinant-mathlib + Mathlib)
+# hex-bareiss-theory (depends on hex-bareiss + hex-determinant-theory + Mathlib)
 
-Mathlib bridge for `hex-bareiss`: proves the row-pivoted Bareiss determinant
+Theory companion for `hex-bareiss`: proves the row-pivoted Bareiss determinant
 correct against both Mathlib's determinant and our executable Leibniz
 determinant, via the no-pivot bordered-minor invariant and the determinant
-correspondence from `hex-determinant-mathlib`. The proofs are stated over an
+correspondence from `hex-determinant-theory`. The proofs are stated over an
 arbitrary commutative coefficient ring with an exact quotient; `Int` is a
 corollary, with no hypotheses beyond what it has today. The kernel
 determinant certificate of hex-bareiss determines the determinant of a
@@ -13,9 +13,9 @@ tactic closes determinant equalities on closed literals with it
 
 This library owns no runtime search, conformance driver or compiled
 benchmark. Its proof-side surface, the `det` tactic, is measured by the
-fresh-module probes under `bench/HexBareissMathlib/ProofProbe` against the
+fresh-module probes under `bench/HexBareissTheory/ProofProbe` against the
 unmodified pinned `eval_det`. Build-only examples live in
-`HexBareissMathlib/Tests.lean`.
+`HexBareissTheory/Tests.lean`.
 
 ## Coefficient contract
 
@@ -140,7 +140,7 @@ theorem bareissWith_eq_mathlib_det [CommRing R] [DecidableEq R]
 Neither carries a nondegeneracy hypothesis: row pivoting handles the singular
 case, and the zero-pivot branch is turned into `det M = 0` rather than being
 excluded. `bareissWith_eq_mathlib_det` is `bareissWith_eq_det` composed with
-`det_eq` (from `hex-determinant-mathlib`), so it holds outright.
+`det_eq` (from `hex-determinant-theory`), so it holds outright.
 
 **`Int` corollaries.** Today's four public theorems keep their names and
 statements verbatim, and gain no new coefficient hypotheses.
@@ -161,15 +161,15 @@ theorem bareiss_eq_det (M : Hex.Matrix Int n n) :
     Hex.Matrix.bareiss M = Hex.Matrix.det M
 ```
 
-The first two are in `HexBareissMathlib/Bareiss.lean`; `bareissDet_eq_det` and
-`bareiss_eq_det` are in the umbrella `HexBareissMathlib.lean`, which is where
+The first two are in `HexBareissTheory/Bareiss.lean`; `bareissDet_eq_det` and
+`bareiss_eq_det` are in the umbrella `HexBareissTheory.lean`, which is where
 they must stay.
 
 Each is the generic theorem instantiated at `quot := Hex.Matrix.exactDiv`, whose
 law is `Int.mul_ediv_cancel`. `Hex.Matrix.bareiss` is by definition
 `bareissWith Hex.Matrix.exactDiv`, so these are applications, not restatements.
-Nothing downstream (`HexGramSchmidtMathlib/Update.lean`,
-`HexGramSchmidtMathlib/Int/RowAdd.lean`) needs to change.
+Nothing downstream (`HexGramSchmidtTheory/Update.lean`,
+`HexGramSchmidtTheory/Int/RowAdd.lean`) needs to change.
 
 **Other carriers.** No carrier-specific determinant correspondence theorem is
 needed. At every supported carrier, the only extra proof supplied at the use
@@ -208,17 +208,17 @@ still forbidden below this layer.
 ## Determinant identity boundary
 
 The only determinant identity consumed is
-`HexMatrixMathlib.desnanot_jacobi_borderedMinor`, in `CorePlucker.lean`, which
+`HexMatrixTheory.desnanot_jacobi_borderedMinor`, in `CorePlucker.lean`, which
 is already stated over an arbitrary Mathlib `CommRing` with no nondegeneracy
 hypothesis. **The generalization requires no change to
-`hex-determinant-mathlib`'s identity surface**, and must not introduce a second
+`hex-determinant-theory`'s identity surface**, and must not introduce a second
 determinant identity development. The general Sylvester identity stays absent
 and stays unnecessary: fraction-free elimination uses only the `2 × 2`
 bordered-minor case, which *is* Desnanot-Jacobi. See
-[hex-determinant-mathlib §Sylvester's determinant identity: absent](https://github.com/leanprover/hex-determinant-mathlib/blob/main/SPEC/hex-determinant-mathlib.md).
+[hex-determinant-theory §Sylvester's determinant identity: absent](https://github.com/leanprover/hex-determinant-theory/blob/main/SPEC/hex-determinant-theory.md).
 
 One declaration next to it does need generalizing rather than duplicating:
-`HexMatrixMathlib.bareissExactDiv_borderedMinor_of_mul_eq` in `CorePlucker.lean`
+`HexMatrixTheory.bareissExactDiv_borderedMinor_of_mul_eq` in `CorePlucker.lean`
 is a thin `Int` re-export of the Mathlib-free
 `Hex.Matrix.bareissExactDiv_borderedMinor_of_mul_eq`, which packages the
 Desnanot-Jacobi product identity as the `hexact` premise of
@@ -236,28 +236,28 @@ theorem exactQuot_borderedMinor_of_mul_eq [CommRing R]
     quot … prevPivot = det (borderedMinor source (k + 1) hnext i j)
 ```
 
-Its `Int` instantiation keeps the existing name, so `HexGramSchmidtMathlib`'s
+Its `Int` instantiation keeps the existing name, so `HexGramSchmidtTheory`'s
 use of the surrounding lemmas is unaffected. Renaming away from
 `bareissExactDiv…` is deliberate: the operation is no longer fixed to
 `exactDiv`, and a five-qualifier name that restates its call site is the naming
 smell the project conventions call out.
 
 Because that declaration is described by name in
-[hex-determinant-mathlib §Desnanot-Jacobi: the four public forms](https://github.com/leanprover/hex-determinant-mathlib/blob/main/SPEC/hex-determinant-mathlib.md),
+[hex-determinant-theory §Desnanot-Jacobi: the four public forms](https://github.com/leanprover/hex-determinant-theory/blob/main/SPEC/hex-determinant-theory.md),
 the implementation owes that SPEC a matching amendment. It is deliberately not
 amended ahead of the code: today it describes what is actually there.
 
 Both `CorePlucker.lean` consumers of `desnanot_jacobi_borderedMinor`
-(`HexBareissMathlib/Bareiss.lean` and `HexGramSchmidtMathlib/Int/Augmented.lean`)
+(`HexBareissTheory/Bareiss.lean` and `HexGramSchmidtTheory/Int/Augmented.lean`)
 continue to work: the second stays at `Int` and picks up the corollary.
 
 ## Kernel certificate
 
-`HexBareissMathlib/Kernel.lean` proves the kernel certificate of
+`HexBareissTheory/Kernel.lean` proves the kernel certificate of
 [hex-bareiss §The kernel certificate](../../HexBareiss/SPEC/hex-bareiss.md#the-kernel-certificate)
 sound for `Matrix.det` over `ℤ` and `ℚ`, stated on the Mathlib matrix of a
 row list (`ofLists`, from the literal layer of
-[hex-matrix-mathlib](../../HexMatrixMathlib/SPEC/hex-matrix-mathlib.md#matrix-literals)):
+[hex-matrix-theory](../../HexMatrixTheory/SPEC/hex-matrix-theory.md#matrix-literals)):
 
 ```lean
 theorem det_eq_of_checkList (n) (L : List (List Int)) (c : DetWitness)
@@ -297,7 +297,7 @@ nonzero product (`prodNat_cast`).
 ## Symbolic determinant
 
 The symbolic handler is specified in
-[hex-poly-det-mathlib](../../SPEC/Libraries/hex-poly-det-mathlib.md). It attaches
+[hex-poly-det-theory](../../SPEC/Libraries/hex-poly-det-theory.md). It attaches
 to this library's determinant syntax and uses a cached, division-free Bird
 recurrence with scalar equality proofs. It is independent of the polynomial
 witness instantiation. Keep symbolic normalization outside this numeric library;
@@ -306,10 +306,10 @@ The generic executable polynomial witness remains a separate hex-bareiss API.
 
 ## The `det` tactic
 
-`HexBareissMathlib/Tactic.lean` declares the non-reserved tactic keyword
+`HexBareissTheory/Tactic.lean` declares the non-reserved tactic keyword
 `det`, closing `A.det = d` and `d = A.det` for `A : Matrix (Fin n) (Fin n) R`
 with `R` either `ℤ` or `ℚ`, a closed literal in one of the four syntaxes
-of the literal layer of `hex-matrix-mathlib` (`!![…]`, `Matrix.of ![…]`,
+of the literal layer of `hex-matrix-theory` (`!![…]`, `Matrix.of ![…]`,
 `fun i j => …`, `Matrix.ofArray xs h`), possibly behind definitions
 (unfolded within a small budget), and `d` a closed value; the term form
 `det% A` returning `Certified Matrix.det A` with its `value` and `proof`
@@ -330,8 +330,8 @@ comparison of the value with `d`. A rational matrix is scaled row by row by
 the least common multiple of its denominators to an integer one, whose
 witness is checked by `checkDetRat` together with the scaling and the
 value, through `det_eq_of_checkRat'`. The tactic takes the shared
-configuration structure `HexMatrixMathlib.Det.Config`, extending
-`HexMatrixMathlib.KernelConfig`, as an `optConfig`
+configuration structure `HexMatrixTheory.Det.Config`, extending
+`HexMatrixTheory.KernelConfig`, as an `optConfig`
 (`det -packing`; the default is packed) and is configured in no other way;
 with packing on the checks are `checkDetListPacked` and `checkDetRatPacked`
 with the entry bound and slot width the tactic computes from the entries
@@ -382,7 +382,7 @@ reduce. Accepted theorems depend on `propext`, `Classical.choice` and
 
 **Comparator.** The unmodified pinned `eval_det` (Bird's algorithm with a
 certificate chain normalized by `ring`) is the comparator. The
-fresh-module probes `bench/HexBareissMathlib/ProofProbe/{Dense8, Dense12,
+fresh-module probes `bench/HexBareissTheory/ProofProbe/{Dense8, Dense12,
 Dense16, Dense32, Tridiagonal16, Vandermonde8, Singular16, Large8Bits64,
 Large4Bits256, Rational8}{Hex,Mathlib}.lean`, written by
 `scripts/bench/det_tactic_probes.py`, prove the same seeded literal by
@@ -425,7 +425,7 @@ reaches `n = 48` on the dense family (2.2 s, of which the kernel is
 `n = 24`, the end of its ladder, on the 64-bit family (0.6 s, kernel
 0.4 s); `det -packing` reaches the same dimensions at 4.4, 1.2 and 0.7 s.
 The record is plotted by
-`scripts/plots/hex-bareiss-mathlib-tactic-size.py` to
+`scripts/plots/hex-bareiss-theory-tactic-size.py` to
 `reports/figures/hex-bareiss-mathlib-tactic-size.svg`.
 
 Median kernel shares recorded by the same size sweep are:
@@ -465,7 +465,7 @@ same certificate producer and proof construction as the term form; do not invent
 a target or call the closing tactic to discover a value. Extensions handle
 symbolic inputs on the same syntax kind and preserve committed errors.
 
-`HexMatrixMathlib.Det.Config` keeps `packing := true`, with `det -packing`
+`HexMatrixTheory.Det.Config` keeps `packing := true`, with `det -packing`
 unchanged, and adds `maxHeartbeats := 2000000` and `maxRelationWork := 1000000`
 for the symbolic handler. These fields do not change numeric certificate
 selection; the numeric backend retains its own existing budgets. Use structure
@@ -499,7 +499,7 @@ route and budget traces.
 
 ## Tests
 
-`HexBareissMathlib/Tests.lean`, build-only:
+`HexBareissTheory/Tests.lean`, build-only:
 
 - `checkDetList` on a hand-written `2 × 2` triangular witness and on a
   hand-written singular witness, discharged by `decide +kernel`, and

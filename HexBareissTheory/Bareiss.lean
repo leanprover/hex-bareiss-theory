@@ -6,13 +6,13 @@ Authors: Kim Morrison
 
 module
 
-public import HexDeterminantMathlib.Core
+public import HexDeterminantTheory.Core
 public import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 
 public section
 
 /-!
-No-pivot Bareiss loop invariant for `hex-matrix-mathlib`.
+No-pivot Bareiss loop invariant for `hex-matrix-theory`.
 
 This module proves the recursive bordered-minor invariant of the no-pivot
 Bareiss recurrence: after `k` regular Bareiss steps, the trailing entries of
@@ -29,7 +29,7 @@ parent module) and the exact-division equation
 (`bareissExactDiv_borderedMinor_of_mul_eq`).
 -/
 
-namespace HexMatrixMathlib
+namespace HexMatrixTheory
 
 universe u
 
@@ -1834,4 +1834,4 @@ theorem noPivotLoop_full_eq_borderedMinor_det
     omega
   exact trailing_eq_at_step hinv (k + 1) hk hstep_eq a c hak hck
 
-end HexMatrixMathlib
+end HexMatrixTheory

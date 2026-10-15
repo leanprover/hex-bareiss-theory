@@ -6,21 +6,21 @@ Authors: Kim Morrison
 
 module
 
-public import HexBareissMathlib.Bareiss
-public import HexBareissMathlib.Kernel
-public import HexBareissMathlib.Tactic
+public import HexBareissTheory.Bareiss
+public import HexBareissTheory.Kernel
+public import HexBareissTheory.Tactic
 
 public section
 
 /-!
-The `HexBareissMathlib` library is the Mathlib bridge for `hex-bareiss`. It
+The `HexBareissTheory` library is the theory companion of `hex-bareiss`. It
 exposes the row-pivoted Bareiss determinant correctness theorems against both
 Mathlib's determinant and the executable Leibniz determinant, building on the
-no-pivot bordered-minor invariant in `HexBareissMathlib.Bareiss` and the
-determinant correspondence in `HexDeterminantMathlib`.
+no-pivot bordered-minor invariant in `HexBareissTheory.Bareiss` and the
+determinant correspondence in `HexDeterminantTheory`.
 -/
 
-namespace HexMatrixMathlib
+namespace HexMatrixTheory
 
 universe u
 
@@ -40,4 +40,4 @@ theorem bareiss_eq_det (M : Hex.Matrix Int n n) :
     Hex.Matrix.bareiss M = Hex.Matrix.det M :=
   (bareiss_eq_mathlib_det M).trans (det_eq M).symm
 
-end HexMatrixMathlib
+end HexMatrixTheory

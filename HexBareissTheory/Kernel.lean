@@ -7,8 +7,8 @@ Authors: Kim Morrison
 module
 
 public import HexBareiss.Kernel
-public import HexMatrixMathlib.Literal
-public import HexMatrixMathlib.Packed
+public import HexMatrixTheory.Literal
+public import HexMatrixTheory.Packed
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import Mathlib.LinearAlgebra.Matrix.Block
 public import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
@@ -23,7 +23,7 @@ the rows of a Mathlib matrix determines `Matrix.det`, and a passing
 integer form.
 
 The row list is identified with the Mathlib matrix through `ofLists` of the
-shared literal layer (`HexMatrixMathlib.Literal`), so the kernel never
+shared literal layer (`HexMatrixTheory.Literal`), so the kernel never
 evaluates an entry through `Matrix.of`/`vecCons` inside the arithmetic.
 
 The proof follows the certificate: the swaps are transpositions, each
@@ -37,7 +37,7 @@ A left kernel vector gives `det A = 0` by `exists_vecMul_eq_zero_iff`.
 
 open Matrix
 
-namespace HexMatrixMathlib
+namespace HexMatrixTheory
 
 open Hex.Matrix Hex.Matrix.DetWitness Hex.Matrix.Packed
 
@@ -412,7 +412,7 @@ theorem det_eq_of_checkRat' {n : Nat} (A : Matrix (Fin n) (Fin n) ℚ) (L : List
 
 The packed triangularization agrees with the plain one under the bounds
 the packed checker verifies, through `dotIntPacked_eq` of
-`HexMatrixMathlib.Packed`. -/
+`HexMatrixTheory.Packed`. -/
 
 theorem mem_nthRow (A : List (List Int)) (i : Nat) : nthRow A i ∈ A ∨ nthRow A i = [] := by
   rw [nthRow_eq_getD]
@@ -548,4 +548,4 @@ theorem det_eq_of_checkRatPacked' {n : Nat} (A : Matrix (Fin n) (Fin n) ℚ) (L 
     (hA : A = ofLists n n L) (h : checkDetRatPacked W k n L s B c v = true) : A.det = v :=
   det_eq_of_checkRat' A L s B c v hA (checkDetRat_of_packed W k n L s B c v h)
 
-end HexMatrixMathlib
+end HexMatrixTheory

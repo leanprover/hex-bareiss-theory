@@ -6,8 +6,8 @@ Authors: Kim Morrison
 
 module
 
-public meta import HexBareissMathlib.Kernel
-public import HexBareissMathlib.Kernel
+public meta import HexBareissTheory.Kernel
+public import HexBareissTheory.Kernel
 public meta import Lean
 
 public meta section
@@ -15,7 +15,7 @@ public meta section
 /-!
 The `det` tactic on Mathlib matrices: closes `A.det = d` (and `d = A.det`)
 for a closed integer or rational matrix literal `A` in one of the four
-syntaxes of `HexMatrixMathlib.Literal` (`!![…]`, `Matrix.of ![…]`,
+syntaxes of `HexMatrixTheory.Literal` (`!![…]`, `Matrix.of ![…]`,
 `fun i j => …`, `Matrix.ofArray xs h`), possibly behind definitions; the
 term form `det% A` returns the certified value as a `Certified` record; and
 the simproc `Hex.norm_det` rewrites `Matrix.det A` using a Hex certificate.
@@ -45,15 +45,15 @@ producer whose witness fails its own check, or a certificate the kernel
 rejects, is a failure, never a fallback.
 -/
 
-namespace HexMatrixMathlib.Det
+namespace HexMatrixTheory.Det
 
-open Lean Meta Elab Hex.Matrix HexMatrixMathlib.Literal
+open Lean Meta Elab Hex.Matrix HexMatrixTheory.Literal
 
 /-- Limits for determinant proof production. The symbolic heartbeat limit is in
 Lean's public units (one unit is 1,000 internal heartbeats); relation work counts
 distinct indexed sum tails. Neither symbolic limit affects numeric certificates.
 Packing applies only to the numeric certificate backend. -/
-structure Config extends HexMatrixMathlib.KernelConfig where
+structure Config extends HexMatrixTheory.KernelConfig where
   maxHeartbeats : Nat := 2000000
   maxRelationWork : Nat := 1000000
 
@@ -178,7 +178,7 @@ def packedBounds (c : Cert) : Nat × Nat :=
   (k, Nat.log2 (c.lit.n * (k * k)) + 1)
 
 /-- Build the proof of `Matrix.det A = v` for the certificate's value `v`. -/
-def build (cfg : HexMatrixMathlib.KernelConfig) (A : Expr) (c : Cert) : MetaM Proof := do
+def build (cfg : HexMatrixTheory.KernelConfig) (A : Expr) (c : Cert) : MetaM Proof := do
   let nE := mkNatLit c.lit.n
   let w := toExpr c.witness
   let B ← rowList (mkConst ``Int) (c.rows.map (·.map toExpr))
@@ -195,9 +195,9 @@ def build (cfg : HexMatrixMathlib.KernelConfig) (A : Expr) (c : Cert) : MetaM Pr
           mkEq (← mkAppM ``Hex.Matrix.checkDetList #[nE, B, w]) (mkConst ``Bool.true)
       let hcheck ← decideProof check
       let eq ← if cfg.packing then
-          mkAppM ``HexMatrixMathlib.det_eq_of_checkListPacked' #[A, B, w, wE, kE, hA, hcheck]
+          mkAppM ``HexMatrixTheory.det_eq_of_checkListPacked' #[A, B, w, wE, kE, hA, hcheck]
         else
-          mkAppM ``HexMatrixMathlib.det_eq_of_checkList' #[A, B, w, hA, hcheck]
+          mkAppM ``HexMatrixTheory.det_eq_of_checkList' #[A, B, w, hA, hcheck]
       -- `DetWitness.value w` reduces to the numeral
       let hvalue ← mkExpectedTypeHint (← mkEqRefl value)
         (← mkEq (← mkAppM ``Hex.Matrix.DetWitness.value #[w]) value)
@@ -214,10 +214,10 @@ def build (cfg : HexMatrixMathlib.KernelConfig) (A : Expr) (c : Cert) : MetaM Pr
           mkEq (← mkAppM ``Hex.Matrix.checkDetRat #[nE, L, s, B, w, value]) (mkConst ``Bool.true)
       let hcheck ← decideProof check
       let proof ← if cfg.packing then
-          mkAppM ``HexMatrixMathlib.det_eq_of_checkRatPacked'
+          mkAppM ``HexMatrixTheory.det_eq_of_checkRatPacked'
             #[A, L, s, B, w, value, wE, kE, hA, hcheck]
         else
-          mkAppM ``HexMatrixMathlib.det_eq_of_checkRat' #[A, L, s, B, w, value, hA, hcheck]
+          mkAppM ``HexMatrixTheory.det_eq_of_checkRat' #[A, L, s, B, w, value, hA, hcheck]
       return ⟨value, proof, check, L⟩
 
 /-- Diagnose a proof the kernel rejected: evaluate the certificate check with
@@ -240,10 +240,10 @@ def diagnose (A : Expr) (c : Cert) (p : Proof) (e : Exception) : MetaM Exception
   let nE := mkNatLit c.lit.n
   let identified ← match c.lit.route with
     | .chain =>
-        let ofL ← mkAppM ``HexMatrixMathlib.ofLists #[nE, nE, p.rowList]
+        let ofL ← mkAppM ``HexMatrixTheory.ofLists #[nE, nE, p.rowList]
         pure (match Kernel.isDefEq env lctx A ofL with | .ok true => true | _ => false)
     | .entrywise =>
-        let check ← mkEq (← mkAppM ``HexMatrixMathlib.entriesEq #[nE, nE, A, p.rowList])
+        let check ← mkEq (← mkAppM ``HexMatrixTheory.entriesEq #[nE, nE, A, p.rowList])
           (mkConst ``Bool.true)
         pure ((← evalBool check) == some true)
   unless identified do
@@ -255,12 +255,12 @@ def diagnose (A : Expr) (c : Cert) (p : Proof) (e : Exception) : MetaM Exception
 that a rejection is reported here, not later, and diagnosed. -/
 def checked (A : Expr) (c : Cert) (p : Proof) (target proof : Expr) : MetaM Expr := do
   try
-    HexMatrixMathlib.Literal.addClosedProof target proof
+    HexMatrixTheory.Literal.addClosedProof target proof
   catch e =>
     throw (← diagnose A c p e)
 
 /-- Prove a determinant target in either orientation. -/
-def proveGoal (cfg : HexMatrixMathlib.KernelConfig) (target : Expr) : MetaM (Outcome Expr) := do
+def proveGoal (cfg : HexMatrixTheory.KernelConfig) (target : Expr) : MetaM (Outcome Expr) := do
   let target ← instantiateMVars target
   let (A, rhs, reverse, lit) ← match ← classify target with
     | .success input => pure input
@@ -319,11 +319,11 @@ def certified (A : Expr) (cfg : Config := {}) : MetaM (Outcome Expr) := do
     | .declined msg => return .declined msg
   let some (_, lhs, _) := (← inferType p.proof).eq? |
     throwError "det: internal error: the proof is not an equality"
-  return .success (← mkAppOptM ``HexMatrixMathlib.Certified.mk
+  return .success (← mkAppOptM ``HexMatrixTheory.Certified.mk
     #[none, none, some lhs.appFn!, some A, some p.value, some p.proof])
 
 /-- `det% A` computes the determinant of a closed integer or rational matrix
-literal `A` and returns a `HexMatrixMathlib.Certified Matrix.det A` record
+literal `A` and returns a `HexMatrixTheory.Certified Matrix.det A` record
 with its value and proof.  The `!![…]` notations are given an integer entry
 expectation. -/
 syntax (name := detTerm) "det%" term:max : term
@@ -348,7 +348,7 @@ def elabDetTerm : Term.TermElab := fun stx expectedType? => do
         | none => pure none
         | some expected => do
           let expected ← whnfR expected
-          if !expected.getAppFn.isConstOf ``HexMatrixMathlib.Certified then
+          if !expected.getAppFn.isConstOf ``HexMatrixTheory.Certified then
             pure none
           else
             let args := expected.getAppArgs
@@ -374,18 +374,18 @@ def normDet? (e : Expr) : MetaM (Option Simp.Result) := do
       return some { expr := p.value, proof? := some p.proof }
   | .notApplicable _ | .declined _ => return none
 
-end HexMatrixMathlib.Det
+end HexMatrixTheory.Det
 
 open Lean Meta in
 /-- The `Hex.norm_det` simproc rewrites the determinant of a closed integer or
 rational matrix literal to its value through the Hex certificate. Unsupported
 inputs are unchanged; a producer failure or kernel rejection is an error. -/
 simproc_decl Hex.norm_det (Matrix.det _) := fun e => do
-  match ← HexMatrixMathlib.Det.normDet? e with
+  match ← HexMatrixTheory.Det.normDet? e with
   | some r => return .done r
   | none => return .continue
 
-namespace HexMatrixMathlib.Det
+namespace HexMatrixTheory.Det
 
 open Lean Meta Elab
 
@@ -450,4 +450,4 @@ def evalDetTac : Tactic.Tactic := fun stx => Tactic.withMainContext do
   | .declined msg =>
       simpCertificate m!"det: declined: {msg}"
 
-end HexMatrixMathlib.Det
+end HexMatrixTheory.Det
